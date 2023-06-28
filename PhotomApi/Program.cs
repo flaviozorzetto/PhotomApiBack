@@ -59,16 +59,24 @@ builder.Services.AddAuthentication(x =>
 builder.Services.AddSingleton<AmazonContext>();
 builder.Services.AddScoped<IBucketService, BucketService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.Configure<AwsCredentialOptions>(builder.Configuration.GetSection("AwsCredentials"));
-builder.Services.Configure<JwtCredentialOptions>(builder.Configuration.GetSection("Jwt"));
+
+var awsCredentialsSection = builder.Configuration.GetSection("AwsCredentials");
+var jwtSection = builder.Configuration.GetSection("Jwt");
+
+builder.Services.Configure<AwsCredentialOptions>(awsCredentialsSection);
+builder.Services.Configure<JwtCredentialOptions>(jwtSection);
 
 var app = builder.Build();
+
+app.Logger.LogInformation("AwsCredentialsEnv:" + awsCredentialsSection.Get<AwsCredentialOptions>());
+app.Logger.LogInformation("JwtCredentialsEnv:" + jwtSection.Get<JwtCredentialOptions>());
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "JWTAuthDemo v1"));
 }
+
 app.UseHttpsRedirection();
 app.UseCors(x => x
             .AllowAnyOrigin()
