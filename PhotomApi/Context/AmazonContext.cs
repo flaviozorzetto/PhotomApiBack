@@ -1,6 +1,5 @@
 ﻿using Amazon;
 using Amazon.S3;
-using Microsoft.Extensions.Options;
 using PhotomApi.Config;
 
 namespace PhotomApi.Context
@@ -10,9 +9,9 @@ namespace PhotomApi.Context
         private readonly AwsCredentialOptions _options;
         public readonly string bucketName = "photom-image-upload-bucket";
         public readonly string rootPrefix = "posts";
-        public AmazonContext(IOptions<AwsCredentialOptions> options)
+        public AmazonContext(AwsCredentialOptions options)
         {
-            _options = options.Value;
+            _options = options;
         }
 
         public AmazonS3Client GetConnection()

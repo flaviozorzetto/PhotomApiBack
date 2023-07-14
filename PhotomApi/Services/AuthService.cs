@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.IdentityModel.Tokens;
 using PhotomApi.Config;
 using PhotomApi.Interfaces;
 using PhotomApi.Models;
@@ -13,9 +12,9 @@ namespace PhotomApi.Services
     {
         private readonly JwtCredentialOptions _jwtOptions;
         private readonly ILogger<AuthService> _logger;
-        public AuthService(IOptions<JwtCredentialOptions> jwtOptions, ILogger<AuthService> logger)
+        public AuthService(JwtCredentialOptions jwtOptions, ILogger<AuthService> logger)
         {
-            _jwtOptions = jwtOptions.Value;
+            _jwtOptions = jwtOptions;
             _logger = logger;
         }
         public User Authenticate(UserLoginDto user)

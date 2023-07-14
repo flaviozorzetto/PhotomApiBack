@@ -69,7 +69,7 @@ namespace PhotomApi.Services
                     {
                         BucketName = _amazonContext.bucketName,
                         Key = o.Key,
-                        Expires = DateTime.UtcNow.AddMinutes(1)
+                        Expires = DateTime.UtcNow.AddHours(1)
                     };
 
                     return new S3ObjectDto()

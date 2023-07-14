@@ -9,6 +9,21 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var awsCredentialOptions = new AwsCredentialOptions()
+{
+    AccessKey = builder.Configuration.GetValue<string>("AwsCredentials_AccessKey"),
+    SecretKey = builder.Configuration.GetValue<string>("AwsCredentials_SecretKey")
+};
+
+var jwtCredentialOptions = new JwtCredentialOptions()
+{
+    Audience = builder.Configuration.GetValue<string>("Jwt_Audience"),
+    ClientID = builder.Configuration.GetValue<string>("Jwt_ClientID"),
+    ClientSecret = builder.Configuration.GetValue<string>("Jwt_ClientSecret"),
+    Issuer = builder.Configuration.GetValue<string>("Jwt_Issuer"),
+    Key = builder.Configuration.GetValue<string>("Jwt_Key"),
+};
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(setup =>
@@ -47,29 +62,25 @@ builder.Services.AddAuthentication(x =>
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtCredentialOptions.Key)),
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = jwtCredentialOptions.Issuer,
+            ValidAudience = jwtCredentialOptions.Audience,
         };
     });
 
+builder.Services.AddSingleton(awsCredentialOptions);
+builder.Services.AddSingleton(jwtCredentialOptions);
 builder.Services.AddSingleton<AmazonContext>();
 builder.Services.AddScoped<IBucketService, BucketService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-var awsCredentialsSection = builder.Configuration.GetSection("AwsCredentials");
-var jwtSection = builder.Configuration.GetSection("Jwt");
-
-builder.Services.Configure<AwsCredentialOptions>(awsCredentialsSection);
-builder.Services.Configure<JwtCredentialOptions>(jwtSection);
-
 var app = builder.Build();
 
-app.Logger.LogInformation("AwsCredentialsEnv:" + awsCredentialsSection.Get<AwsCredentialOptions>());
-app.Logger.LogInformation("JwtCredentialsEnv:" + jwtSection.Get<JwtCredentialOptions>());
+app.Logger.LogInformation("AwsCredentialsEnv:" + awsCredentialOptions.ToString());
+app.Logger.LogInformation("JwtCredentialsEnv:" + jwtCredentialOptions.ToString());
 
 if (app.Environment.IsDevelopment())
 {
